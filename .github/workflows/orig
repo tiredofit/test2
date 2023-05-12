@@ -1,0 +1,27 @@
+name: Github Actions Demo
+run-name: ${{ github.actor }} is testing out Github Actions 🚀
+on: [push]
+jobs:
+  Explore-Gitea-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: |
+          set -x
+          cat .git/config
+          cat .git/config
+          b="$(git branch --no-color | cut -c3-)" 
+          h="$(git rev-parse $b)"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git config --global user.name "Your Name"
+          echo "Current branch: $b $h"
+          #c="$(git rev-parse $b~1)"
+          #echo "Recreating $b branch with initial commit $c ..."
+          git checkout --orphan new-start $b
+          git commit -C $b
+          git rebase --onto new-start $b $b 
+          git branch -d new-start 
+          git gc
+          git push -f

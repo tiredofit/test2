@@ -1,0 +1,28 @@
+name: Build
+#run-name: ${{ github.actor }} is testing out Github Actions 🚀
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: |
+          # Remove all but recent commit
+          git config user.name github-actions > /dev/null 2>&1
+          git config user.email github-actions@github.com > /dev/null 2>&1
+          git checkout --orphan tiredofit_gh ${GITHUB_REF_NAME} > /dev/null 2>&1
+          git commit -C ${GITHUB_REF_NAME} > /dev/null 2>&1
+          git rebase --onto tiredofit_gh ${GITHUB_REF_NAME} ${GITHUB_REF_NAME} > /dev/null 2>&1
+          git branch -d tiredofit_gh > /dev/null 2>&1
+          git gc > /dev/null 2>&1
+          git push -f > /dev/null 2>&1
+          env | sort
+      - uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+          script: |
+            const response = await github.request("DELETE /user/packages/container/${{ env.PACKAGE_NAME }}/versions")
+        env:
+          PACKAGE_NAME: test2
+          PER_PAGE: 100
